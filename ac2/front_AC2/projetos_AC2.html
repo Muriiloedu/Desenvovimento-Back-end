@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Projetos</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      color: #222;
+      padding: 32px 16px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 24px;
+      color: #333;
+    }
+
+    /* FORMULÁRIO */
+    .form-box {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 20px;
+      max-width: 600px;
+      margin-bottom: 36px;
+    }
+
+    .form-box h2 {
+      font-size: 1rem;
+      margin-bottom: 16px;
+      color: #444;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      font-size: .82rem;
+      margin-bottom: 4px;
+      color: #555;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      font-size: .9rem;
+      padding: 7px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      color: #222;
+      outline: none;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: #555;
+    }
+
+    .field textarea { resize: vertical; min-height: 72px; }
+
+    .row { display: flex; gap: 12px; }
+    .row .field { flex: 1; }
+
+    .form-actions { margin-top: 16px; display: flex; gap: 10px; }
+
+    button {
+      font-size: .88rem;
+      padding: 8px 18px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #fff;
+      color: #333;
+    }
+
+    button.primary {
+      background: #2c6fad;
+      color: #fff;
+      border-color: #2c6fad;
+    }
+    button.primary:hover { background: #255d93; }
+    button:not(.primary):hover { background: #eee; }
+
+    .msg-erro {
+      color: #c0392b;
+      font-size: .82rem;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* TABELA */
+    .table-box { max-width: 900px; }
+
+    .table-box h2 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: #444;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: .88rem;
+    }
+
+    thead { background: #e8e8e8; }
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: bold;
+      color: #333;
+      border-bottom: 1px solid #ddd;
+    }
+
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #eee;
+      color: #333;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    .status {
+      display: inline-block;
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 3px;
+      border: 1px solid #ccc;
+      background: #f5f5f5;
+      color: #555;
+    }
+    .status.andamento    { background: #eaf5ea; border-color: #a3d4a3; color: #2d6a2d; }
+    .status.planejamento { background: #fff8e8; border-color: #e0cc7a; color: #7a5a00; }
+    .status.concluido    { background: #f0f0f0; border-color: #bbb;    color: #666; }
+
+    #sem-dados {
+      text-align: center;
+      padding: 28px;
+      color: #888;
+      font-size: .88rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Gerenciamento de Projetos</h1>
+
+  <!-- FORMULÁRIO -->
+  <div class="form-box">
+    <h2>Novo Projeto</h2>
+
+    <div class="field">
+      <label>Descrição *</label>
+      <textarea id="f-descricao" placeholder="Descreva o projeto"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Data de Início *</label>
+        <input id="f-inicio" type="date"/>
+      </div>
+      <div class="field">
+        <label>Data de Fim</label>
+        <input id="f-fim" type="date"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Status</label>
+      <select id="f-status">
+        <option value="">— Selecione —</option>
+        <option value="Planejamento">Planejamento</option>
+        <option value="Em andamento">Em andamento</option>
+        <option value="Concluído">Concluído</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button class="primary" onclick="salvar()">Salvar</button>
+      <button onclick="limpar()">Limpar</button>
+    </div>
+    <div class="msg-erro" id="erro"></div>
+  </div>
+
+  <!-- LISTAGEM -->
+  <div class="table-box">
+    <h2>Projetos Cadastrados</h2>
+    <div id="sem-dados">Nenhum projeto cadastrado.</div>
+    <table id="tabela" style="display:none">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Descrição</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+<script>
+  const API = 'http://localhost:8080';
+
+  function fmt(d) {
+    if (!d) return '—';
+    const [y, m, dia] = d.split('-');
+    return `${dia}/${m}/${y}`;
+  }
+
+  function statusClass(s) {
+    if (!s) return '';
+    const v = s.toLowerCase();
+    if (v.includes('andamento'))   return 'andamento';
+    if (v.includes('planejamento')) return 'planejamento';
+    if (v.includes('conclu'))      return 'concluido';
+    return '';
+  }
+
+  function erro(msg) {
+    const el = document.getElementById('erro');
+    el.textContent = msg;
+    el.style.display = msg ? 'block' : 'none';
+  }
+
+  function renderizar(lista) {
+    const tabela   = document.getElementById('tabela');
+    const semDados = document.getElementById('sem-dados');
+    const tbody    = document.getElementById('tbody');
+
+    if (!lista.length) {
+      tabela.style.display = 'none';
+      semDados.style.display = 'block';
+      return;
+    }
+
+    tabela.style.display = 'table';
+    semDados.style.display = 'none';
+
+    tbody.innerHTML = lista.map(p => `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.descricao || '—'}</td>
+        <td>${fmt(p.dataInicio)}</td>
+        <td>${fmt(p.dataFim)}</td>
+        <td><span class="status ${statusClass(p.status)}">${p.status || '—'}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  async function carregar() {
+    try {
+      const res = await fetch(`${API}/projetos`);
+      if (!res.ok) throw new Error();
+      renderizar(await res.json());
+    } catch {
+      // modo demo quando API offline
+      renderizar([
+        { id:1, descricao:'Desenvolvimento do sistema web', dataInicio:'2024-01-10', dataFim:'2024-06-30', status:'Em andamento' },
+        { id:2, descricao:'Aplicativo mobile para clientes', dataInicio:'2024-03-01', dataFim:'2024-12-31', status:'Planejamento' },
+        { id:3, descricao:'Migração para cloud',            dataInicio:'2024-02-15', dataFim:null,          status:'Em andamento' },
+      ]);
+    }
+  }
+
+  async function salvar() {
+    erro('');
+    const descricao  = document.getElementById('f-descricao').value.trim();
+    const dataInicio = document.getElementById('f-inicio').value;
+    const dataFim    = document.getElementById('f-fim').value || null;
+    const status     = document.getElementById('f-status').value;
+
+    if (!descricao)  return erro('A descrição é obrigatória.');
+    if (!dataInicio) return erro('A data de início é obrigatória.');
+    if (dataFim && dataFim < dataInicio) return erro('Data de fim não pode ser anterior à data de início.');
+
+    try {
+      const res = await fetch(`${API}/projetos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descricao, dataInicio, dataFim, status })
+      });
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        throw new Error(e.message || 'Erro ao salvar');
+      }
+      limpar();
+      carregar();
+    } catch (e) {
+      // modo demo: adiciona linha direto na tabela
+      const tbody  = document.getElementById('tbody');
+      const novoId = tbody.querySelectorAll('tr').length + 1;
+      const tr     = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${novoId}</td>
+        <td>${descricao}</td>
+        <td>${fmt(dataInicio)}</td>
+        <td>${fmt(dataFim)}</td>
+        <td><span class="status ${statusClass(status)}">${status || '—'}</span></td>
+      `;
+      document.getElementById('tabela').style.display = 'table';
+      document.getElementById('sem-dados').style.display = 'none';
+      tbody.appendChild(tr);
+      limpar();
+    }
+  }
+
+  function limpar() {
+    ['f-descricao', 'f-inicio', 'f-fim'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-status').value = '';
+    erro('');
+  }
+
+  carregar();
+</script>
+</body>
+</html>
